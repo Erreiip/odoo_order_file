@@ -21,7 +21,6 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 """
-""" MLS PIR """
 
 import sys
 import re
@@ -210,3 +209,5 @@ if len(sys.argv) > 1:
     index_args += 1
 else:
    raise Exception("Usage: order_file <file_name1> <file_name2> ...")
+
+""" MLS PIR """
