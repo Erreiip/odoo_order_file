@@ -21,7 +21,7 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 """
-
+import os
 import sys
 import re
 
@@ -42,13 +42,13 @@ class Fields:
   def get_last_line(self):
     lines = self.string.split('\n')
     return lines[-2]
-  
+
   def remove_unused_lines(self):
     lines = self.string.split('\n')
     while not lines[-1].lstrip() or lines[-1].lstrip() == '\n':
       lines.pop(-1)
     self.string = '\n'.join(lines) + '\n'
-  
+
   def __lt__(self, other):
     return self.string < other.string
 
@@ -67,13 +67,6 @@ class Methods(Fields):
 
 
 # Methods
-def write_on_file(file, tab_to_write):
-  total_size = 0
-  for field in tab_to_write:
-    file.write(field.string)
-    total_size += field.size
-  return total_size
-
 def check_index(tab, index, field_type):
   if len(tab) < index + 1 or (any(tab[index]) and tab[index][-1].__class__ != field_type):
     tab.append([])
@@ -88,18 +81,36 @@ def number_of_space(line):
       nb_space += 1
     else:
       return nb_space
-  
+
+def tidy_up_recursively(path):
+  full_path = os.path.abspath(path)
+  file_in_dir = [ os.path.join(full_path, os.path.split(f.path)[1]) for f in os.scandir(path)]
+  for file in file_in_dir:
+    if os.path.isdir(file):
+      tidy_up_recursively(file)
+      continue
+    if os.path.splitext(file)[1] == '.py':
+      import pdb; pdb.set_trace()
+      tidy_up_file(file)
+
+def write_on_file(file, tab_to_write):
+  total_size = 0
+  for field in tab_to_write:
+    file.write(field.string)
+    total_size += field.size
+  return total_size
+
 # Const
 METHODS = Methods
 FIELDS = Fields
 
-
+# Main method
 def tidy_up_file(file_name):
     try:
       file = open(file_name, "r")
     except IOError:
        raise Exception("Aucun fichier dont le nom est %s trouvable" % file_name)
-    
+
     # Prepare for the write
     lines = file.readlines()
     file.seek(0)
@@ -135,7 +146,7 @@ def tidy_up_file(file_name):
           fields[group_index][-1].set_size(index - fields[group_index][-1].index + 1 + ( 1 if file_last_line else 0))
           is_in_field = False
           last_line_was_field = True
-        
+
       if is_in_method:
         has_same_space = number_of_space(line) == fields[group_index][-1].space
         is_not_entry = re.search(field_methods, line.lower()) == None
@@ -143,9 +154,9 @@ def tidy_up_file(file_name):
         if (has_same_space and (is_not_entry or (not is_not_entry and last_line_was_space))) or file_last_line:
             fields[group_index][-1].set_size(index - fields[group_index][-1].index)
             is_in_method = False
-            last_line_was_method = True 
+            last_line_was_method = True
             if file_last_line:
-              fields[group_index][-1].set_size(fields[group_index][-1].size + 1)  
+              fields[group_index][-1].set_size(fields[group_index][-1].size + 1)
               fields[group_index][-1].add_string(line + '\n')
         else:
           fields[group_index][-1].add_string(line)
@@ -175,7 +186,7 @@ def tidy_up_file(file_name):
       if index == len(fields):
         group_fields[-1].remove_unused_lines()
       index += 1
-      
+
 
     # Rewrite on the file
     file.close()
@@ -199,15 +210,19 @@ def tidy_up_file(file_name):
         index += 1
 
     file_tmp.close()
-      
+
 
 
 if len(sys.argv) > 1:
   index_args = 1
   while index_args < len(sys.argv):
-    tidy_up_file(sys.argv[index_args])
+    is_dir = os.path.isdir(sys.argv[index_args])
+    if is_dir:
+      tidy_up_recursively(sys.argv[index_args])
+    else:
+      tidy_up_file(sys.argv[index_args])
     index_args += 1
 else:
-   raise Exception("Usage: order_file <file_name1> <file_name2> ...")
+   raise Exception("Usage: order_file <file_name1 | dir_name1> <file_name2 | dir_name2> ...")
 
 """ MLS PIR """
