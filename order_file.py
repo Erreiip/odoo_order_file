@@ -116,7 +116,7 @@ def tidy_up_file(file_name):
     file.seek(0)
 
     # Check all the fields ans set them in the fields array
-    field_regex = "..*=?fields\.(.*2.*|boolean|char|selection|integer|date|text|html|datetime|monetary|binary)\("
+    field_regex = "..*=?fields\.(.*2.*|boolean|char|selection|integer|date|text|html|datetime|monetary|binary|float)\("
     field_methods = "^( )*((def .*\(.*\):)|\@.*)"
     fields = []
     group_index = 0
