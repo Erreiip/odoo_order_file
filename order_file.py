@@ -90,7 +90,6 @@ def tidy_up_recursively(path):
       tidy_up_recursively(file)
       continue
     if os.path.splitext(file)[1] == '.py':
-      import pdb; pdb.set_trace()
       tidy_up_file(file)
 
 def write_on_file(file, tab_to_write):
