@@ -28,10 +28,10 @@ import re
 
 # class Fields
 class Fields:
-  def __init__(self,  string, index):
+  def __init__(self,  string, index, size=0):
     self.string = string
     self.index = index
-    self.size = 0
+    self.size = size
 
   def add_string(self, string):
     self.string += string
@@ -47,7 +47,7 @@ class Fields:
     lines = self.string.split('\n')
     while not lines[-1].lstrip() or lines[-1].lstrip() == '\n':
       lines.pop(-1)
-    self.string = '\n'.join(lines) + '\n'
+    self.string = '\n'.join(lines) + '\n\n'
 
   def __lt__(self, other):
     return self.string < other.string
@@ -132,7 +132,10 @@ def tidy_up_file(file_name):
       if file_size == index + 1:
         file_last_line = True
 
-      if (not is_in_field and not is_in_method) and not re.search( field_regex, line.lower()) and (last_line_was_field or last_line_was_method):
+      is_field = re.search(field_regex, line.lower())
+      is_method = re.search(field_methods, line.lower())
+
+      if (not is_in_field and not is_in_method) and not (is_field or is_method) and (last_line_was_field or last_line_was_method):
         if any(line.lstrip()):
           group_index += 1
           last_line_was_field = False
@@ -152,7 +155,7 @@ def tidy_up_file(file_name):
         is_not_entry = re.search(field_methods, line.lower()) == None
         last_line_was_space = not fields[group_index][-1].get_last_line().lstrip()
         if (has_same_space and (is_not_entry or (not is_not_entry and last_line_was_space))) or file_last_line:
-            fields[group_index][-1].set_size(index - fields[group_index][-1].index)
+            fields[group_index][-1].set_size(index - fields[group_index][-1].index + 1)
             is_in_method = False
             last_line_was_method = True
             if file_last_line:
@@ -162,13 +165,15 @@ def tidy_up_file(file_name):
           fields[group_index][-1].add_string(line)
 
       if not is_in_method and not is_in_field:
-        if re.search(field_regex, line.lower()):
+        if is_field:
           group_index += check_index(fields, group_index, FIELDS)
-          fields[group_index].append(Fields(line, index))
+          fields[group_index].append(Fields(line, index, 1))
           is_in_field = ')' not in line
           last_line_was_field = ')' in line
           last_line_was_method = False
-        elif re.search(field_methods, line.lower()):
+          if file_last_line:
+            fields[group_index][-1].add_string('\n')
+        elif is_method:
           group_index += check_index(fields, group_index, METHODS)
           fields[group_index].append(Methods(line, index, number_of_space(line)))
           is_in_method = True
@@ -180,13 +185,12 @@ def tidy_up_file(file_name):
     # Sorting groups
     index = 1
     for group_fields in fields:
+      if index == len(fields):
+        group_fields[-1].remove_unused_lines()
       group_fields.sort()
       if group_fields[0].__class__ != METHODS:
         group_fields[-1].add_string('\n')
-      if index == len(fields):
-        group_fields[-1].remove_unused_lines()
       index += 1
-
 
     # Rewrite on the file
     file.close()
