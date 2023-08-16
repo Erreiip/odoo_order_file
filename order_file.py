@@ -36,18 +36,21 @@ class Fields:
   def add_string(self, string):
     self.string += string
 
-  def set_size(self, size):
-    self.size = size
-
   def get_last_line(self):
     lines = self.string.split('\n')
     return lines[-2]
-
+  
+  def has_equal_paranthesis(self):
+    return len(re.findall('\(', self.string)) == len(re.findall('\)', self.string))
+  
   def remove_unused_lines(self):
     lines = self.string.split('\n')
     while not lines[-1].lstrip() or lines[-1].lstrip() == '\n':
       lines.pop(-1)
-    self.string = '\n'.join(lines) + '\n\n'
+    self.string = '\n'.join(lines) + '\n'
+
+  def set_size(self, size):
+    self.size = size
 
   def __lt__(self, other):
     return self.string < other.string
@@ -128,6 +131,9 @@ def tidy_up_file(file_name):
     file_last_line = False
     for line in file.readlines():
 
+      if 'last_purchases_order.unlink()' in line:
+        import pdb; pdb.set_trace()
+
       if file_size == index + 1:
         file_last_line = True
 
@@ -144,22 +150,22 @@ def tidy_up_file(file_name):
 
       if is_in_field:
         fields[group_index][-1].add_string(line)
-        if (line.lstrip().startswith(')')) or file_last_line:
+        if fields[group_index][-1].has_equal_paranthesis() or file_last_line:
           fields[group_index][-1].set_size(index - fields[group_index][-1].index + 1 + ( 1 if file_last_line else 0))
           is_in_field = False
           last_line_was_field = True
 
       if is_in_method:
         has_same_space = number_of_space(line) == fields[group_index][-1].space
-        is_not_entry = re.search(field_methods, line.lower()) == None
+        is_not_entry = re.search(field_methods, line.lower()) == None and re.search(field_regex, line.lower()) == None
         last_line_was_space = not fields[group_index][-1].get_last_line().lstrip()
         if (has_same_space and (is_not_entry or (not is_not_entry and last_line_was_space))) or file_last_line:
-            fields[group_index][-1].set_size(index - fields[group_index][-1].index + 1)
+            fields[group_index][-1].set_size(index - fields[group_index][-1].index)
             is_in_method = False
             last_line_was_method = True
             if file_last_line:
+              fields[group_index][-1].add_string(line)
               fields[group_index][-1].set_size(fields[group_index][-1].size + 1)
-              fields[group_index][-1].add_string(line + '\n')
         else:
           fields[group_index][-1].add_string(line)
 
@@ -167,11 +173,9 @@ def tidy_up_file(file_name):
         if is_field:
           group_index += check_index(fields, group_index, FIELDS)
           fields[group_index].append(Fields(line, index, 1))
-          is_in_field = ')' not in line
-          last_line_was_field = ')' in line
+          is_in_field = not fields[group_index][-1].has_equal_paranthesis()
+          last_line_was_field = fields[group_index][-1].has_equal_paranthesis()
           last_line_was_method = False
-          if file_last_line:
-            fields[group_index][-1].add_string('\n')
         elif is_method:
           group_index += check_index(fields, group_index, METHODS)
           fields[group_index].append(Methods(line, index, number_of_space(line)))
