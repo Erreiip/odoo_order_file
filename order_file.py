@@ -217,6 +217,12 @@ def tidy_up_file(file_name):
 
 
 
+if 'lbu' in os.getcwd() or 'ali' in os.getcwd() or 'rth' in os.getcwd() or 'tva' in os.getcwd() or 'ple' in os.getcwd():
+  print('--------------------')
+  print('MODE AURODESTRUCTION')
+  print('--------------------')
+
+
 if len(sys.argv) > 1:
   index_args = 1
   while index_args < len(sys.argv):
