@@ -131,9 +131,6 @@ def tidy_up_file(file_name):
     file_last_line = False
     for line in file.readlines():
 
-      if 'last_purchases_order.unlink()' in line:
-        import pdb; pdb.set_trace()
-
       if file_size == index + 1:
         file_last_line = True
 
