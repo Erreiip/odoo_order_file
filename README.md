@@ -20,4 +20,6 @@ To reorder file/directory: `py odoo_order_file.py <file_name1 | dir_name1> <file
 
 ## Super Secrets
 ### Success
-- [ ] Get the "AUTODESTRUCTION MODE"
+- [ ] Get the "AUTODESTRUCTION MODE" (1/2)
+- [ ] Get the "RARE MODE" (1/4)
+- [ ] Get the "YOU ARE GOING TO WIN THE LOTTERY" (1/12000)
