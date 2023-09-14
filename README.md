@@ -12,3 +12,7 @@ To reorder multiple file: `py odoo_order_file.py <file_name1> <file_name2>  <fil
 To reorder multiple directory: `py odoo_order_file.py <dir_name1> <dir_name2>...`<br><br>
 
 To reorder file/directory: `py odoo_order_file.py <file_name1 | dir_name1> <file_name2 | dir_name2> ...`<br>
+
+
+> [!WARNING]
+> The method that scan the directory is recursive so if a directory contain a symbolic link to himself it's going to crash
