@@ -1,4 +1,4 @@
-# odoo_order_file
+# odoo_order_file :shipit:
 An automatic orderer for odoo files
 
 
