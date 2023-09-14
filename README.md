@@ -16,3 +16,8 @@ To reorder file/directory: `py odoo_order_file.py <file_name1 | dir_name1> <file
 
 > [!WARNING]
 > The method that scan the directory is recursive so if a directory contain a symbolic link to himself it's going to crash
+
+
+## Super Secrets
+### Success
+- [ ] Get the "AUTODESTRUCTION MODE"
